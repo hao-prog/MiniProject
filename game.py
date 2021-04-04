@@ -7,10 +7,7 @@ import math
 class Game:
 
     pygame.init()
-    star = "sun.png"
-    one = "One.png"
-    two = "Two.png"
-
+    
     pygame.display.set_caption("Star Trek")
     pygame.display.set_icon(pygame.image.load("solar-system.png"))
 
@@ -30,25 +27,26 @@ class Game:
         self.background = pygame.transform.scale(
             self.milky, (self.width, self.height))
 
-        self.stars = pygame.sprite.Group()
-        self.planets = pygame.sprite.Group()
+        self.earths = pygame.sprite.Group()
+        self.moons = pygame.sprite.Group()
 
     def loop(self):
         if self.playing:
-            self.stars.add(Star(self))
-            self.planets.add(Planet(self, 1))
+            for i in range(1, 11):                
+                self.moons.add(Moon(self, i))
+            self.earths.add(Earth(self))
 
         while self.playing:
 
             self.events()
 
             self.window.blit(self.background, (0, 0))
-            self.stars.update()
-            self.planets.update()
+            self.earths.update()
+            self.moons.update()
 
-            self.stars.draw(self.window)
-            self.planets.draw(self.window)
-            
+            self.earths.draw(self.window)
+            self.moons.draw(self.window)
+
             pygame.display.update()
             self.clock.tick(self.fps)
 
@@ -62,34 +60,41 @@ class Game:
                     self.playing = False
                     self.running = False
                 if event.key == pygame.K_SPACE:
-                    print(self.planets.sprites()[0].x)
+                    print(self.moons.sprites()[0].x)
 
 
-class Planet(pygame.sprite.Sprite):
+class Moon(pygame.sprite.Sprite):
     def __init__(self, game, n, t=0):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
+        self.w = self.game.width//2
+        self.h = self.game.height//2
         self.time = t
         self.image = pygame.image.load("Baren.png")
-        self.image = pygame.transform.scale(self.image,(30, 30))
+        size = int(game.height * 0.03)
+        self.image = pygame.transform.scale(self.image,(size, size))
         self.rect = self.image.get_rect()
-        self.a = 300*n
-        self.rect.center = [self.game.width//2, self.game.height//2 + self.a]
+        self.r = int(game.height * (0.045 * n +  0.0175))
+        self.rect.center = [self.w, self.h + self.r]
+        self.dir = random.choice([-1, 1])
+        self.cycle = random.randint(1000, 1500) - (12-n)*75
 
     def update(self):
         self.time += 1
-        self.theta = 2*math.pi*self.time/1000
-        self.x = math.cos(self.theta)*self.a
-        self.y = math.sin(self.theta)*self.a
-        self.rect.center = [self.game.width//2 + self.x, self.game.height//2 + self.y]
-        pygame.draw.circle(self.game.window, (255, 204, 0), self.game.stars.sprites()[0].rect.center, self.a, width = 2)
+        self.theta = 2*math.pi*self.time/self.cycle
+        self.x = math.cos(self.theta)*self.r
+        self.y = self.dir * math.sin(self.theta)*self.r
+        self.rect.center = [self.w + self.x, self.h + self.y]
+        pygame.draw.circle(self.game.window, (255,255,255), (self.w, self.h), self.r, 1)
 
 
-class Star(pygame.sprite.Sprite):
+
+class Earth(pygame.sprite.Sprite):
     def __init__(self, game):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("Terran.png")
-        self.image = pygame.transform.scale(self.image,(70, 70))
+        size = int(game.height * 0.055)
+        self.image = pygame.transform.scale(self.image,(size, size))
         self.rect = self.image.get_rect()
         self.rect.center =[game.width//2, game.height//2]
 
