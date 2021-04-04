@@ -88,6 +88,7 @@ class Moon(pygame.sprite.Sprite):
         pygame.draw.circle(self.game.window, (255,255,255), (self.w, self.h), self.r, 1)
 
 
+
 class Earth(pygame.sprite.Sprite):
     def __init__(self, game):
         pygame.sprite.Sprite.__init__(self)
