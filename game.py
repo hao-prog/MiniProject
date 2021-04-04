@@ -48,7 +48,7 @@ class Game:
 
             self.stars.draw(self.window)
             self.planets.draw(self.window)
-
+            
             pygame.display.update()
             self.clock.tick(self.fps)
 
@@ -82,6 +82,7 @@ class Planet(pygame.sprite.Sprite):
         self.x = math.cos(self.theta)*self.a
         self.y = math.sin(self.theta)*self.a
         self.rect.center = [self.game.width//2 + self.x, self.game.height//2 + self.y]
+        pygame.draw.circle(self.game.window, (255, 204, 0), self.game.stars.sprites()[0].rect.center, self.a, width = 2)
 
 
 class Star(pygame.sprite.Sprite):
