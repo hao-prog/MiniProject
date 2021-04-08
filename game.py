@@ -93,7 +93,7 @@ class Earth(pygame.sprite.Sprite):
     def __init__(self, game):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("Terran.png")
-        size = int(game.height * 0.055)
+        size = int(game.height * 0.13)
         self.image = pygame.transform.scale(self.image,(size, size))
         self.rect = self.image.get_rect()
         self.rect.center =[game.width//2, game.height//2]
