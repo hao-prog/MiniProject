@@ -4,7 +4,7 @@ import random
 import math
 import numpy
 import operator
-
+from sklearn.utils import shuffle
 
 class Game:
 
@@ -41,11 +41,15 @@ class Game:
         self.two = None
         self.three = None
 
-        # self.alpha = random.randint(0, 4)
-        # self.beta = random.randint(5, 9)
-
-        self.alpha = 0
-        self.beta = 2
+        self.alpha = random.randint(0, 9)
+        flag = True
+        while flag:
+            daGap = random.randint(2, 4)
+            self.beta = self.alpha + random.choice((-1, 1)) * daGap
+            if self.beta < 0 or self.beta > 9:
+                continue
+            else:
+                flag = False
         self.result = []
 
         self.imgz = []
@@ -75,7 +79,6 @@ class Game:
             self.window.blit(self.canvas, (0, 0))
             self.canvas.blit(self.background, (0, 0))
             self.canvas.blit(self.updFPS(), (20, 20))
-
             if self.quest:
                 if not self.hide:
                     self.blitTimes()
@@ -197,6 +200,7 @@ class Game:
                 self.creImg(self.moonz[i], self.moonz[i+3])
             if i+4 < s:
                 self.creImg(self.moonz[i], self.moonz[i+4])
+        self.imgz, self.sizez = shuffle(self.imgz, self.sizez, random_state=0)
 
     def creImg(self, a, b):
 
