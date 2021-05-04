@@ -6,6 +6,7 @@ import numpy
 import operator
 from sklearn.utils import shuffle
 
+
 class Game:
 
     pygame.init()
@@ -20,11 +21,13 @@ class Game:
         self.font = pygame.font.Font('editundo.ttf', 32)
 
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.fps = 66
 
         self.window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.width = self.window.get_width()
         self.height = self.window.get_height()
+        self.wi = self.width//2
+        self.he = self.height//2
 
         self.canvas = pygame.Surface((self.width, self.height))
         self.id = 0
@@ -42,14 +45,8 @@ class Game:
         self.three = None
 
         self.alpha = random.randint(0, 9)
-        flag = True
-        while flag:
-            daGap = random.randint(2, 4)
-            self.beta = self.alpha + random.choice((-1, 1)) * daGap
-            if self.beta < 0 or self.beta > 9:
-                continue
-            else:
-                flag = False
+        self.beta = self.rndBeta()
+
         self.result = []
 
         self.imgz = []
@@ -59,14 +56,20 @@ class Game:
 
         self.topz = round(self.height*0.5787)
 
-        self.letdraw = False
+        self.countdown = False
+        self.cd = 359
 
         self.quest = True
         self.basic = True
-        self.time1 = 10800
+        self.time1 = 10801
         self.time2 = 7200
         self.loading = False
         self.hide = False
+
+        self.faded = pygame.Surface(
+            (self.width, self.height), pygame.SRCALPHA, 32)
+        self.faded = self.faded.convert_alpha()
+        self.faded.fill((0, 0, 0, 175))
 
     def loop(self):
         if self.playing:
@@ -79,13 +82,25 @@ class Game:
             self.window.blit(self.canvas, (0, 0))
             self.canvas.blit(self.background, (0, 0))
             self.canvas.blit(self.updFPS(), (20, 20))
+
+            if self.time1 == 10800:
+                self.countdown = True
+
             if self.quest:
                 if not self.hide:
                     self.blitTimes()
                     self.blitSpace()
                     self.blitAitch()
                 self.blitPlanets()
-                if self.basic:
+
+                if self.countdown:
+                    self.blitCountdown()
+                    self.cd -= 1
+                    if self.cd == 0:
+                        self.countdown = False
+                        self.time1 -= 1
+
+                elif self.basic:
                     self.time1 -= 1
                     if self.time1 <= 0:
                         self.basic = False
@@ -114,6 +129,7 @@ class Game:
                 self.canvas.blit(e, (self.width//2, self.height//2))
 
             pygame.display.update()
+
             self.clock.tick(self.fps)
 
     def addPlanets(self):
@@ -166,6 +182,15 @@ class Game:
                 if event.key == pygame.K_h:
                     self.hide = not self.hide
 
+    def blitCountdown(self):
+        self.window.blit(self.faded, (0, 0))
+
+        l = 'Game start in:'
+        self.blitText(l, self.wi-150, self.he-100, self.window, size=50)
+
+        cd = str(self.cd//60)
+        self.blitText(cd, self.wi - 25, self.he, self.window, size=100)
+
     def blitPlanets(self):
 
         self.earths.update()
@@ -173,6 +198,13 @@ class Game:
 
         self.earths.draw(self.canvas)
         self.moons.draw(self.canvas)
+
+    def rndBeta(self):
+        t = -1
+        while t < 0 or t > 9:
+            daGap = random.randint(2, 4)
+            t = self.alpha + random.choice((-1, 1)) * daGap
+        return t
 
     def updFPS(self):
 
@@ -363,10 +395,10 @@ class Game:
         self.canvas.blit(img, (x, y))
 
     def blitTimes(self):
-        t1 = 'You have'
-        self.blitText(t1, 50, 200, self.canvas)
-        l1 = str(self.time1//60) + " s"
-        self.blitText(l1, 200, 200, self.canvas, color=(249, 192, 0))
+        l1 = 'You have'
+        self.blitText(l1, 50, 200, self.canvas)
+        t1 = str(self.time1//60) + " s"
+        self.blitText(t1, 200, 200, self.canvas, color=(249, 192, 0))
         l2 = 'to observe ten'
         self.blitText(l2, 50, 240, self.canvas)
         l3 = 'moving planets'
@@ -435,8 +467,8 @@ class Game:
 
     def blitRules(self):
         l = []
-        l.append('Based on what you have')        
-        l.append('seen, now you have to')        
+        l.append('Based on what you have')
+        l.append('seen, now you have to')
         l.append('find 3 stages where')
         l.append('2 selected planets')
         l.append('and the center planet')
@@ -483,8 +515,9 @@ class Moon(pygame.sprite.Sprite):
         self.orbit = True
 
     def update(self):
-        self.time += 1
-        self.rect.center = self.coord(self.time, self.w, self.h)
+        if not self.game.countdown:
+            self.time += 1
+            self.rect.center = self.coord(self.time, self.w, self.h)
 
         if self.orbit:
             pygame.draw.circle(self.game.canvas, (255, 255, 255),
@@ -502,7 +535,6 @@ class Moon(pygame.sprite.Sprite):
         for i in range(0, 12000):
             dots.append(self.coord(i))
         return dots
-
 
 
 class Earth(pygame.sprite.Sprite):
