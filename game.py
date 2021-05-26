@@ -57,7 +57,7 @@ class Game:
 
         self.quest = True
 
-        self.countdown = False
+        self.countdown = True
         self.cd = 359
         self.faded = pygame.Surface(
             (self.width, self.height), pygame.SRCALPHA, 32)
