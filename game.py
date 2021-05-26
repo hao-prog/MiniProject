@@ -66,7 +66,6 @@ class Game:
 
         self.basic = True
         self.time1 = 10801
-
         self.time2 = 7200
 
         self.hide = False
@@ -134,19 +133,8 @@ class Game:
                 self.blitAns()
 
             else:
-                f = pygame.font.Font('editundo.ttf', 40)
-                self.blitText(self.end, self.wi - f.size(self.end)[0]//2,
-                              self.he//6, self.canvas, size=40)
-                self.blitText("Your answer:", self.wi - f.size("Your answer:")[0]//2,
-                              self.he//3, self.canvas, size=40)
-                self.blitChoices(y = self.he//2)
-                
-                self.blitText("Correct answer:", self.wi - f.size("Correct answer:")[0]//2,
-                              self.he*9//16 + self.topz//2 , self.canvas, size=40)
-                self.blitChoices(y = self.he*5//4, result = True)
-                self.blitText("Press R to play again!", self.wi - f.size("Press R to play again!")[0]//2,
-                              self.he*15//8, self.canvas, size=40)
-                
+                self.blitResults()
+
             pygame.display.update()
             self.clock.tick(self.fps)
 
@@ -157,22 +145,24 @@ class Game:
         self.moonz = self.moons.sprites()
         self.alpha = self.moonz[self.alpha]
         self.beta = self.moonz[self.beta]
-        
+
     def addClouds(self):
         tempMoon = self.alpha.id - 1
         if self.alpha.id < self.beta.id:
             tempMoon = self.beta.id - 1
-        
-        angle1 = random.randint(0, 360) * math.pi / 180   
+
+        angle1 = random.randint(0, 360) * math.pi / 180
         anglez = []
         for i in range(0, 3):
             anglez.append(angle1 + i * 2 * math.pi / 3)
-        
+
         for angle in anglez:
-            centerX = math.cos(angle)*self.moonz[tempMoon].r + self.moonz[tempMoon].w
-            centerY = math.sin(angle)*self.moonz[tempMoon].r + self.moonz[tempMoon].h
-            self.clouds.add(Cloud(self, centerX, centerY))    
-        
+            centerX = math.cos(
+                angle)*self.moonz[tempMoon].r + self.moonz[tempMoon].w
+            centerY = math.sin(
+                angle)*self.moonz[tempMoon].r + self.moonz[tempMoon].h
+            self.clouds.add(Cloud(self, centerX, centerY))
+
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -183,11 +173,14 @@ class Game:
                     self.playing = False
                     self.running = False
                 if event.key == pygame.K_1:
-                    self.one = self.id
+                    if self.ans:
+                        self.one = self.id
                 if event.key == pygame.K_2:
-                    self.two = self.id
+                    if self.ans:
+                        self.two = self.id
                 if event.key == pygame.K_3:
-                    self.three = self.id
+                    if self.ans:
+                        self.three = self.id
                 if event.key == pygame.K_RIGHT:
                     self.id += 1
                     if self.id >= len(self.imgz):
@@ -213,10 +206,10 @@ class Game:
                 if event.key == pygame.K_r:
                     self.moons.empty()
                     self.clouds.empty()
-                    
+
                     self.alpha = random.randint(0, 9)
                     self.beta = self.rndBeta()
-                    
+
                     self.addPlanets()
                     self.imgz = []
                     self.sizez = []
@@ -225,6 +218,8 @@ class Game:
                     self.three = None
                     self.result = []
                     self.resultSizez = []
+                    self.countdown = True
+                    self.cd = 359
                     self.ans = False
                     self.quest = True
                     self.basic = True
@@ -335,7 +330,7 @@ class Game:
             if i+4 < s:
                 self.creImg(self.moonz[i], self.moonz[i+4])
         self.imgz, self.sizez = shuffle(self.imgz, self.sizez, random_state=0)
-        
+
     def creImg(self, a, b):
         t = self.sizeImg(a, b)
         s = round(max(a.r, b.r)*t*1.05*2)
@@ -436,11 +431,25 @@ class Game:
         h = self.height//3
         x = self.wi-self.topz//2
         y = h-self.topz//2
-        
+
         self.blitBorder(self.top, x, y)
         self.canvas.blit(self.top, (x, y))
         self.blitIndex(x+20, y+20)
         self.blitChoices()
+
+    def blitResults(self):
+        f = pygame.font.Font('editundo.ttf', 40)
+        self.blitText(self.end, self.wi - f.size(self.end)[0]//2,
+                      self.he//6, self.canvas, size=40)
+        self.blitText("Your answer:", self.wi - f.size("Your answer:")[0]//2,
+                      self.he//3, self.canvas, size=40)
+        self.blitChoices(y=self.he//2)
+
+        self.blitText("Correct answer:", self.wi - f.size("Correct answer:")[0]//2,
+                      self.he*9//16 + self.topz//2, self.canvas, size=40)
+        self.blitChoices(y=self.he*5//4, result=True)
+        self.blitText("Press R to play again!", self.wi - f.size("Press R to play again!")[0]//2,
+                      self.he*15//8, self.canvas, size=40)
 
     def blitBorder(self, img, x, y):
         mask = pygame.mask.from_surface(img)
@@ -457,7 +466,7 @@ class Game:
         index = str(self.id+1) + "/" + str(l)
         self.blitText(index, x, y, self.canvas)
 
-    def blitChoices(self, y = 0, result = False):
+    def blitChoices(self, y=0, result=False):
         t = self.topz//2
         x = self.width//6
         if y == 0:
@@ -485,7 +494,7 @@ class Game:
             else:
                 self.blitRect(x*5-t//4, y)
 
-    def blitChoice(self, c, x, y, s = 0):
+    def blitChoice(self, c, x, y, s=0):
         if type(c) is int:
             img = self.getImg(c)
         else:
@@ -557,7 +566,7 @@ class Moon(pygame.sprite.Sprite):
         self.theta = 2*math.pi*time/self.cycle
         self.x = math.cos(self.theta)*self.r
         self.y = math.sin(self.theta)*self.r
-        
+
         return (self.x + w, self.y + h)
 
     def getDots(self):
@@ -576,15 +585,16 @@ class Earth(pygame.sprite.Sprite):
         self.image = self.raw
         self.rect = self.image.get_rect()
         self.rect.center = (game.wi, game.he)
-        
+
+
 class Cloud(pygame.sprite.Sprite):
     def __init__(self, game, centerX, centerY):
         pygame.sprite.Sprite.__init__(self)
-        
-        self.raw = pygame.image.load("Matls/Others/cloud{}.png".format(random.choice((1, 2))))
+
+        self.raw = pygame.image.load(
+            "Matls/Others/cloud{}.png".format(random.choice((1, 2))))
         size = round(game.height * 0.5)
         self.raw = pygame.transform.scale(self.raw, (size, size))
         self.image = self.raw
         self.rect = self.image.get_rect()
         self.rect.center = (centerX, centerY)
-        
