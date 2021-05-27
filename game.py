@@ -180,12 +180,12 @@ class Game:
                 if event.key == pygame.K_3:
                     if self.ans:
                         self.three = self.id
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT and self.ans:
                     self.id += 1
                     if self.id >= len(self.imgz):
                         self.id = 0
                     self.setImg()
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT and self.ans:
                     self.id -= 1
                     if self.id < 0:
                         self.id = len(self.imgz)-1
