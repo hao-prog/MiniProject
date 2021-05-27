@@ -2,7 +2,6 @@ import pygame
 from pygame.locals import *
 import random
 import math
-import numpy
 import operator
 from sklearn.utils import shuffle
 
